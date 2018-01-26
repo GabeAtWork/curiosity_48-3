@@ -16,6 +16,16 @@ export default class extends Phaser.State {
     banner.padding.set(10, 16);
     banner.anchor.setTo(0.5);
 
+    const callToClickText = 'Left-click to start';
+    let callToClick = this.add.text(this.world.centerX, this.world.centerY, callToClickText, {
+      font: '20px Bangers',
+      fill: '#220022',
+      smoothed: false
+    });
+
+    callToClick.padding.set(10, 16);
+    callToClick.anchor.setTo(0.5);
+
     /*this.mushroom = new Mushroom({
       game: this.game,
       x: this.world.centerX,
