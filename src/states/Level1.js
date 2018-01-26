@@ -19,9 +19,11 @@ export default class extends Phaser.State {
     const velocityTestObject = platformGroup.create(250, 300, 'ground');
     velocityTestObject.scale.setTo(0.5, 1);
     velocityTestObject.body.velocity.x = 250;
-    velocityTestObject.customProps = {
-      multiplier: 1.5
-    };
+    velocityTestObject.inputEnabled = true;
+    velocityTestObject.events.onInputDown.add(() => {
+      this.props.recordVelocityHistory = true;
+      this.props.recordedObject = velocityTestObject;
+    });
 
     const cursors = this.input.keyboard.createCursorKeys();
 
@@ -32,21 +34,25 @@ export default class extends Phaser.State {
       player,
       cursors,
       velocityTestObject,
+      velocityHistory: [],
+      recordedObject: null,
+      recordVelocityHistory: false,
+      playVelocityHistory: false,
     }
   }
 
   update() {
-    const {player, platformGroup, cursors, velocityTestObject} = this.props;
+    const {player, platformGroup, cursors, velocityTestObject, velocityHistory, recordedObject, recordVelocityHistory, playVelocityHistory} = this.props;
     const hitPlatform = this.physics.arcade.collide(player, platformGroup);
 
     player.body.velocity.x = 0;
 
     if (cursors.left.isDown) {
-      player.body.velocity.x = -150;
+      player.body.velocity.x = -50;
       player.animations.play('left');
     }
     else if (cursors.right.isDown) {
-      player.body.velocity.x = 150;
+      player.body.velocity.x = 50;
       player.animations.play('right');
     }
     else {
@@ -59,6 +65,7 @@ export default class extends Phaser.State {
       player.body.velocity.y = -300;
     }
 
+    // Platform movement
     if (velocityTestObject.x > 400) {
       if (velocityTestObject.body.velocity.x > -250) {
         velocityTestObject.body.velocity.x -= 5;
@@ -67,6 +74,23 @@ export default class extends Phaser.State {
       if (velocityTestObject.body.velocity.x < 250) {
         velocityTestObject.body.velocity.x += 5;
       }
+    }
+
+    // Checking for the hold
+    if (recordVelocityHistory && recordedObject) {
+      velocityHistory.push(recordedObject.body.velocity.x);
+    } else if (playVelocityHistory) {
+      if (velocityHistory.length) {
+        player.body.velocity.x = velocityHistory.shift();
+      } else {
+        this.props.playVelocityHistory = false;
+        this.props.velocityHistory = [];
+      }
+    }
+
+    if (this.input.activePointer.isUp && recordVelocityHistory) {
+      this.props.recordVelocityHistory = false;
+      this.props.playVelocityHistory = true;
     }
   }
 
