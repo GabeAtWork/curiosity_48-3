@@ -25,15 +25,10 @@ export default class extends Phaser.State {
 
     callToClick.padding.set(10, 16);
     callToClick.anchor.setTo(0.5);
-
-    /*this.mushroom = new Mushroom({
-      game: this.game,
-      x: this.world.centerX,
-      y: this.world.centerY,
-      asset: 'mushroom'
-    })
-
-    this.game.add.existing(this.mushroom)*/
+    callToClick.inputEnabled = true;
+    callToClick.events.onInputDown.add(() => {
+      this.state.start('Level1', true);
+    });
   }
 
   render () {
