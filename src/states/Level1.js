@@ -16,6 +16,12 @@ export default class extends Phaser.State {
     const platformGroup = this.createPlatformsGroup();
     const ground = this.createGround(platformGroup);
     const player = this.createPlayer();
+    const velocityTestObject = platformGroup.create(250, 300, 'ground');
+    velocityTestObject.scale.setTo(0.5, 1);
+    velocityTestObject.body.velocity.x = 250;
+    velocityTestObject.customProps = {
+      multiplier: 1.5
+    };
 
     const cursors = this.input.keyboard.createCursorKeys();
 
@@ -25,11 +31,12 @@ export default class extends Phaser.State {
       ground,
       player,
       cursors,
+      velocityTestObject,
     }
   }
 
   update() {
-    const {player, platformGroup, cursors} = this.props;
+    const {player, platformGroup, cursors, velocityTestObject} = this.props;
     const hitPlatform = this.physics.arcade.collide(player, platformGroup);
 
     player.body.velocity.x = 0;
@@ -51,10 +58,16 @@ export default class extends Phaser.State {
     if (cursors.up.isDown && player.body.touching.down && hitPlatform) {
       player.body.velocity.y = -300;
     }
-  }
 
-  setState(newState) {
-    this.state = newState;
+    if (velocityTestObject.x > 400) {
+      if (velocityTestObject.body.velocity.x > -250) {
+        velocityTestObject.body.velocity.x -= 5;
+      }
+    } else if (velocityTestObject.x < 300) {
+      if (velocityTestObject.body.velocity.x < 250) {
+        velocityTestObject.body.velocity.x += 5;
+      }
+    }
   }
 
   createBanner() {
