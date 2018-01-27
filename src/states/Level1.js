@@ -98,9 +98,10 @@ export default class extends Level {
     const banner = this.createBanner();
 
     const cursors = this.input.keyboard.createCursorKeys();
-    const orbHover = this.add.sprite(-32, -32, 'orb-hover');
-    orbHover.anchor.setTo(0, 0);
-    laserGroup.add(orbHover);
+    const orbHalo = this.add.sprite(0, 0, 'orb-halo');
+    orbHalo.scale.set(1, 1);
+    orbHalo.anchor.setTo(0, 0);
+    laserGroup.add(orbHalo);
 
     this.props = {
       banner,
@@ -111,7 +112,7 @@ export default class extends Level {
       laserGroup,
       cursors,
       winPortal,
-      orbHover,
+      orbHalo,
       gameState: GAME_STATE_PLAYING,
       recordings: [],
       hoveredCapturables: [],

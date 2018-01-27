@@ -18,6 +18,7 @@ export default class extends Phaser.State {
     this.load.image('fog', 'assets/images/Background_Fog.png');
     this.load.image('foliage', 'assets/images/environment/Foliage_01.png');
     this.load.spritesheet('orb-hover', 'assets/images/effects/Orbe_hover.png', 32, 32);
+    this.load.image('orb-halo', 'assets/images/effects/halo_orbe_hold.png');
   }
 
   create() {
@@ -289,7 +290,7 @@ export default class extends Phaser.State {
   }
 
   renderLaser() {
-    const {player, currentLaserTarget, laserGroup, orbHover} = this.props;
+    const {player, currentLaserTarget, laserGroup, orbHalo} = this.props;
     if (this.props.graphics) {
       this.props.graphics.destroy();
     }
@@ -314,6 +315,14 @@ export default class extends Phaser.State {
       graphics.lineTo(line.end.x, line.end.y);
       graphics.endFill();
       this.props.graphics = graphics;
+      orbHalo.alpha = 0.8;
+      orbHalo.x = currentLaserTarget.x;
+      orbHalo.y = currentLaserTarget.y;
+
+      console.log('currentLaserTarget.x', currentLaserTarget.x);
+      console.log('currentLaserTarget.y', currentLaserTarget.y);
+    } else {
+      orbHalo.alpha = 0;
     }
   }
 
@@ -332,12 +341,6 @@ export default class extends Phaser.State {
 
   onCapturableHoverOut(target) {
     const currentClickedCapturable = this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
-
-    console.log('hoverOut');
-    console.log('this.props.currentLaserTarget === target', this.props.currentLaserTarget === target);
-    console.log('target !== currentClickedCapturable', target !== currentClickedCapturable);
-    console.log('currentClickedCapturable', currentClickedCapturable);
-    console.log('target', target);
 
     if (this.props.hoveredCapturables.indexOf(target) > 0) {
       this.props.hoveredCapturables = this.props.hoveredCapturables.filter(hoveredCapturable => target === hoveredCapturable);
