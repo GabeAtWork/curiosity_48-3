@@ -167,6 +167,7 @@ export default class extends Phaser.State {
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
     player.body.gravity.y = 0;
+    this.props.orbHalo.destroy();
   }
 
   createBanner() {
@@ -316,11 +317,11 @@ export default class extends Phaser.State {
       graphics.endFill();
       this.props.graphics = graphics;
       orbHalo.alpha = 0.8;
-      orbHalo.x = currentLaserTarget.x;
-      orbHalo.y = currentLaserTarget.y;
-
-      console.log('currentLaserTarget.x', currentLaserTarget.x);
-      console.log('currentLaserTarget.y', currentLaserTarget.y);
+      orbHalo.x = currentLaserTarget.x - 14;
+      orbHalo.y = currentLaserTarget.y - 14;
+      const haloScaleX = 1 + (currentLaserTarget.scale.x - 1) / 2;
+      const haloScaleY = 1 + (currentLaserTarget.scale.y - 1) / 2;
+      orbHalo.scale.setTo(haloScaleX, haloScaleY);
     } else {
       orbHalo.alpha = 0;
     }
