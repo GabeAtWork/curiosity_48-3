@@ -1,3 +1,4 @@
+/* globals __DEV__ */
 import UniqueAxisPlatform from '../sprites/UniqueAxisPlatform';
 import Level, {GAME_STATE_PLAYING} from './Level';
 
@@ -42,13 +43,16 @@ const uniqueAxisPlatformsSource = [
 
 export default class extends Level {
   init() {
-    this.stage.backgroundColor = '#86c1a6';
   }
 
   preload(game) {
     super.preload(game);
     this.load.image('ground', 'assets/images/loader-bg.png');
     this.load.image('loaderBar', 'assets/images/loader-bar.png');
+    this.load.image('ground1', 'assets/images/levels/one/Level_01_Ground_01.png');
+    this.load.image('ground2', 'assets/images/levels/one/Level_01_Ground_02.png');
+    this.load.image('ground3', 'assets/images/levels/one/Level_01_Ground_03.png');
+    this.load.image('spikes', 'assets/images/Spikes.png');
   }
 
   create() {
@@ -61,13 +65,16 @@ export default class extends Level {
 
     const banner = this.createBanner();
     const platformGroup = this.createPhysicsGroup();
-    const groundGroup = this.createPhysicsGroup();
-    const ground = this.createGround(groundGroup, 0, this.world.height - 52);
-    ground.scale.setTo(3, 2);
-    const player = this.createPlayer(32, this.world.height - 150);
     const killers = this.spawnKillerGroup();
 
-    const spikes = killers.create(300, this.world.height - 72, 'loaderBar');
+    const groundGroup = this.createPhysicsGroup();
+    const ground1 = this.createGround(groundGroup, 0, this.world.height - 64, 'ground1');
+    const ground2 = this.createGround(groundGroup, this.world.width - 192, this.world.height - 128, 'ground2');
+    const ground3 = this.createGround(groundGroup, this.world.width - 192 - 195, this.world.height - 32, 'ground3');
+    const player = this.createPlayer(32, this.world.height - 150);
+
+    const spikes = this.add.tileSprite(this.world.width - 192 - 195, this.world.height - 50, 195, 32, 'spikes');
+    killers.add(spikes);
     spikes.body.immovable = true;
 
     const cursors = this.input.keyboard.createCursorKeys();
@@ -75,13 +82,12 @@ export default class extends Level {
       this.spawnCapturable(platformData, platformGroup, UniqueAxisPlatform);
     });
 
-    const winPortal = this.spawnWinPortal(this.world.width - 28, this.world.height - 76);
+    const winPortal = this.spawnWinPortal(this.world.width - 28, this.world.height - 128 - 24);
 
     this.props = {
       banner,
       groundGroup,
       platformGroup,
-      ground,
       player,
       killers,
       cursors,

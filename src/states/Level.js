@@ -14,10 +14,14 @@ export default class extends Phaser.State {
   preload() {
     this.load.spritesheet('curiosity', 'assets/images/curiosity.png', 32, 32);
     this.load.spritesheet('win-portal', 'assets/images/win-portal.png', 32, 32);
+    this.load.image('background', 'assets/images/Background.png');
+    this.load.image('fog', 'assets/images/Background_Fog.png');
   }
 
   create() {
     this.physics.startSystem(Phaser.Physics.ARCADE);
+    this.background = this.add.sprite(0, 0, 'background');
+    this.fog = this.add.sprite(0, 0, 'fog');
   }
 
   update() {
@@ -184,8 +188,8 @@ export default class extends Phaser.State {
     return physicsGroup;
   }
 
-  createGround(group, x, y) {
-    const ground = group.create(x, y, 'ground');
+  createGround(group, x, y, assetRef = 'ground') {
+    const ground = group.create(x, y, assetRef);
     ground.body.immovable = true;
 
     return ground;
