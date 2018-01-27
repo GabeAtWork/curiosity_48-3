@@ -4,40 +4,45 @@ import Level, {GAME_STATE_PLAYING} from './Level';
 
 const uniqueAxisPlatformsSource = [
   {
-    x: 200,
-    y: 300,
+    x: 150,
+    y: 150,
     bounds: {
       x: {
         min: 150,
-        max: 500
+        max: 410,
       },
       y: {
-        min: 300,
-        max: 400,
+        min: 150,
+        max: 150,
       }
     },
     initialVelocity: {
       x: 250,
       y: 0,
-    }
+    },
+    normalAsset: 'orb-1',
+    activeAsset: 'orb-1-active'
   },
   {
     x: 50,
-    y: 100,
+    y: 0,
     bounds: {
       x: {
         min: 50,
         max: 50
       },
       y: {
-        min: 50,
-        max: 350,
+        min: 0,
+        max: 260,
       }
     },
     initialVelocity: {
       x: 0,
       y: 250,
-    }
+    },
+    scale: 1.5,
+    normalAsset: 'orb-2',
+    activeAsset: 'orb-2-active'
   }
 ];
 
@@ -53,6 +58,11 @@ export default class extends Level {
     this.load.image('ground2', 'assets/images/levels/one/Level_01_Ground_02.png');
     this.load.image('ground3', 'assets/images/levels/one/Level_01_Ground_03.png');
     this.load.image('spikes', 'assets/images/Spikes.png');
+    this.load.image('orb-1', 'assets/images/orbs/Orbe01.png');
+    this.load.image('orb-1-active', 'assets/images/orbs/Orbe01_Active.png');
+    this.load.image('orb-2', 'assets/images/orbs/Orbe02.png');
+    this.load.image('orb-2-active', 'assets/images/orbs/Orbe02_Active.png');
+    this.load.image('spikes', 'assets/images/Spikes.png');
   }
 
   create() {
@@ -64,7 +74,6 @@ export default class extends Level {
     super.create();
 
     const banner = this.createBanner();
-    const platformGroup = this.createPhysicsGroup();
     const killers = this.spawnKillerGroup();
 
     const groundGroup = this.createPhysicsGroup();
@@ -78,8 +87,9 @@ export default class extends Level {
     spikes.body.immovable = true;
 
     const cursors = this.input.keyboard.createCursorKeys();
+    const platformGroup = this.createPhysicsGroup();
     uniqueAxisPlatformsSource.forEach(platformData => {
-      this.spawnCapturable(platformData, platformGroup, UniqueAxisPlatform);
+      this.spawnCapturable(Object.assign({}, platformData, {}), platformGroup, UniqueAxisPlatform);
     });
 
     const winPortal = this.spawnWinPortal(this.world.width - 28, this.world.height - 128 - 24);

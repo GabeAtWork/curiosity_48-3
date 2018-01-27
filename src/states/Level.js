@@ -210,16 +210,11 @@ export default class extends Phaser.State {
   }
 
   spawnCapturable(capturableData, platformGroup, CapturableType) {
-    const {x, y, asset = 'ground', bounds, initialVelocity} = capturableData;
+    const {initialVelocity} = capturableData;
 
-    const capturable = new CapturableType({
+    const capturable = new CapturableType(Object.assign({}, capturableData, {
       game: this.game,
-      x,
-      y,
-      asset,
       level: this,
-      bounds,
-      initialVelocity,
       startRecording: () => {
         this.props.recordings.push({
           target: capturable,
@@ -228,9 +223,9 @@ export default class extends Phaser.State {
           state: RECORDING_STATE_CAPTURING,
           averageXVel: 0,
           averageYVel: 0,
-        })
+        });
       }
-    });
+    }));
     platformGroup.add(capturable);
     capturable.body.velocity.x = initialVelocity.x;
     capturable.body.velocity.y = initialVelocity.y;
@@ -271,6 +266,7 @@ export default class extends Phaser.State {
             state = RECORDING_STATE_PLAYING;
             averageXVel = velocities.reduce((acc, vel) => acc + vel.x, 0) / velocities.length;
             averageYVel = velocities.reduce((acc, vel) => acc + vel.y, 0) / velocities.length;
+            target.setInactive();
           } else {
             velocities.push(target.body.velocity);
           }
