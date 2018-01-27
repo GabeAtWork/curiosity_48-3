@@ -73,9 +73,7 @@ export default class extends Level {
 
     super.create();
 
-    const banner = this.createBanner();
     const killers = this.spawnKillerGroup();
-
     const groundGroup = this.createPhysicsGroup();
     const ground1 = this.createGround(groundGroup, 0, this.world.height - 64, 'ground1');
     const ground2 = this.createGround(groundGroup, this.world.width - 192, this.world.height - 128, 'ground2');
@@ -86,13 +84,23 @@ export default class extends Level {
     killers.add(spikes);
     spikes.body.immovable = true;
 
-    const cursors = this.input.keyboard.createCursorKeys();
+    const laserGroup = this.add.group();
     const platformGroup = this.createPhysicsGroup();
     uniqueAxisPlatformsSource.forEach(platformData => {
-      this.spawnCapturable(Object.assign({}, platformData, {}), platformGroup, UniqueAxisPlatform);
+      this.spawnCapturable(Object.assign({}, platformData, {
+        onHoverIn: target => this.onCapturableHoverIn(target),
+        onHoverOut: target => this.onCapturableHoverOut(target),
+      }), platformGroup, UniqueAxisPlatform);
     });
 
     const winPortal = this.spawnWinPortal(this.world.width - 28, this.world.height - 128 - 24);
+
+    const banner = this.createBanner();
+
+    const cursors = this.input.keyboard.createCursorKeys();
+    const orbHover = this.add.sprite(-32, -32, 'orb-hover');
+    orbHover.anchor.setTo(0, 0);
+    laserGroup.add(orbHover);
 
     this.props = {
       banner,
@@ -100,10 +108,13 @@ export default class extends Level {
       platformGroup,
       player,
       killers,
+      laserGroup,
       cursors,
       winPortal,
+      orbHover,
       gameState: GAME_STATE_PLAYING,
       recordings: [],
+      hoveredCapturables: [],
     }
   }
 }

@@ -1,4 +1,4 @@
-import Phaser from 'phaser-ce/build/custom/phaser-split';
+import Phaser from 'phaser-ce';
 
 export const RECORDING_STATE_CAPTURING = 'RECORDING_STATE_CAPTURING';
 export const RECORDING_STATE_PLAYING = 'RECORDING_STATE_PLAYING';
@@ -16,6 +16,8 @@ export default class extends Phaser.State {
     this.load.spritesheet('win-portal', 'assets/images/win-portal.png', 32, 32);
     this.load.image('background', 'assets/images/Background.png');
     this.load.image('fog', 'assets/images/Background_Fog.png');
+    this.load.image('foliage', 'assets/images/environment/Foliage_01.png');
+    this.load.spritesheet('orb-hover', 'assets/images/effects/Orbe_hover.png', 32, 32);
   }
 
   create() {
@@ -25,7 +27,7 @@ export default class extends Phaser.State {
   }
 
   update() {
-    const {killers, player, winPortal, pause} = this.props;
+    const {killers, player, winPortal, pause, state} = this.props;
 
     killers.forEach(killer => {
       this.physics.arcade.overlap(player, killer, () => this.gameOver(), null, this);
@@ -34,6 +36,10 @@ export default class extends Phaser.State {
 
     if (!pause) {
       this.playGameLoop();
+    }
+
+    if (state === GAME_STATE_WON) {
+      this.props.graphics.clear();
     }
   }
 
@@ -102,6 +108,8 @@ export default class extends Phaser.State {
     } else {
       player.body.gravity.y = 500;
     }
+
+    this.renderLaser();
   }
 
   gameOver() {
@@ -133,16 +141,16 @@ export default class extends Phaser.State {
   }
 
   displayGameEndUi(titleText, titleColor, buttonText, buttonColor, onClick) {
-    const title = this.add.text(this.world.centerX, this.world.centerY - 50, titleText, {
-      font: '60px Bangers',
+    const title = this.add.text(this.world.centerX, this.world.centerY - 50, titleText.toUpperCase(), {
+      font: '60px Raleway',
       fill: titleColor,
       smoothed: false
     });
     title.padding.set(10, 16);
     title.anchor.setTo(0.5);
 
-    const button = this.add.text(this.world.centerX, this.world.centerY, buttonText, {
-      font: '30px Bangers',
+    const button = this.add.text(this.world.centerX, this.world.centerY, buttonText.toUpperCase(), {
+      font: '30px Raleway',
       fill: buttonColor,
       smoothed: false
     });
@@ -164,8 +172,8 @@ export default class extends Phaser.State {
     const hiddenY = -50;
     const displayedY = 50;
 
-    const banner = this.add.text(this.world.centerX, hiddenY, this.bannerText, {
-      font: '40px Bangers',
+    const banner = this.add.text(this.world.centerX, hiddenY, this.bannerText.toUpperCase(), {
+      font: '40px Raleway',
       fill: '#449944',
       smoothed: false
     });
@@ -278,5 +286,64 @@ export default class extends Phaser.State {
         }
         return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
       });
+  }
+
+  renderLaser() {
+    const {player, currentLaserTarget, laserGroup, orbHover} = this.props;
+    if (this.props.graphics) {
+      this.props.graphics.destroy();
+    }
+
+    if (currentLaserTarget) {
+      // rayon = 16
+      const line = new Phaser.Line(player.x + 10, player.y, currentLaserTarget.x + currentLaserTarget.width / 2, currentLaserTarget.y + currentLaserTarget.height / 2);
+      /*const AC = line.length - currentLaserTarget.width / 2;
+      console.log('AC', AC);
+      const ACX = AC * Math.cos(line.angle) + player.x - 16;
+      const ACY = AC * Math.sin(line.angle) + player.y - 16;
+      console.log('AC.x', ACX);
+      console.log('AC.y', ACY);
+      orbHover.x = ACX;
+      orbHover.y = ACY;*/
+
+      const graphics = this.add.graphics(0, 0);
+      laserGroup.add(graphics);
+      graphics.clear();
+      graphics.lineStyle(1, 0xff0101, 1);
+      graphics.moveTo(line.start.x, line.start.y);
+      graphics.lineTo(line.end.x, line.end.y);
+      graphics.endFill();
+      this.props.graphics = graphics;
+    }
+  }
+
+  onCapturableHoverIn(target) {
+    const currentClickedCapturable = this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
+
+    if (currentClickedCapturable && currentClickedCapturable.target !== target) {
+      if (this.props.hoveredCapturables.indexOf(target) < 0) {
+        this.props.hoveredCapturables.push(target);
+      }
+    } else {
+      this.props.hoveredCapturables = [];
+      this.props.currentLaserTarget = target;
+    }
+  }
+
+  onCapturableHoverOut(target) {
+    const currentClickedCapturable = this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
+
+    console.log('hoverOut');
+    console.log('this.props.currentLaserTarget === target', this.props.currentLaserTarget === target);
+    console.log('target !== currentClickedCapturable', target !== currentClickedCapturable);
+    console.log('currentClickedCapturable', currentClickedCapturable);
+    console.log('target', target);
+
+    if (this.props.hoveredCapturables.indexOf(target) > 0) {
+      this.props.hoveredCapturables = this.props.hoveredCapturables.filter(hoveredCapturable => target === hoveredCapturable);
+    }
+    if (this.props.currentLaserTarget === target && !currentClickedCapturable) {
+      this.props.currentLaserTarget = null;
+    }
   }
 }

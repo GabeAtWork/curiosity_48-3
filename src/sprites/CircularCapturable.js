@@ -5,11 +5,6 @@ export default class extends Capturable {
     super(properties);
   }
 
-  update() {
-    this.updateMovementByAxis('x');
-    this.updateMovementByAxis('y');
-  }
-
   updateMovementByAxis(directionName) {
 
   }

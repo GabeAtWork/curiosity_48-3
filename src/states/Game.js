@@ -6,19 +6,18 @@ export default class extends Phaser.State {
   preload () {}
 
   create () {
-    const bannerText = 'Curiosity 48-3';
-    let banner = this.add.text(this.world.centerX, 50, bannerText, {
-      font: '40px Bangers',
+    const bannerText = 'CURIOSITY 48-3';
+    let banner = this.add.text(this.world.centerX, this.world.centerY, bannerText, {
+      font: '80px Yantramanav',
       fill: '#449944',
       smoothed: false
     });
-
     banner.padding.set(10, 16);
     banner.anchor.setTo(0.5);
 
-    const callToClickText = 'Left-click to start';
-    let callToClick = this.add.text(this.world.centerX, this.world.centerY, callToClickText, {
-      font: '20px Bangers',
+    const callToClickText = 'CLICK TO START';
+    let callToClick = this.add.text(this.world.centerX, this.world.centerY + 100, callToClickText, {
+      font: '30px Yantramanav',
       fill: '#220022',
       smoothed: false
     });
