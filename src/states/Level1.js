@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import Capturable from '../sprites/Capturable';
+import UniqueAxisPlatform from '../sprites/UniqueAxisPlatform';
 
 const RECORDING_STATE_CAPTURING = 'RECORDING_STATE_CAPTURING';
 const RECORDING_STATE_PLAYING = 'RECORDING_STATE_PLAYING';
@@ -7,7 +7,7 @@ const GAME_STATE_PLAYING = 'GAME_STATE_PLAYING';
 const GAME_STATE_LOST = 'GAME_STATE_LOST';
 const GAME_STATE_WON = 'GAME_STATE_WON';
 
-const capturablesSource = [
+const uniqueAxisPlatformsSource = [
   {
     x: 200,
     y: 300,
@@ -68,16 +68,14 @@ export default class extends Phaser.State {
     const groundGroup = this.createPhysicsGroup();
     const ground = this.createGround(groundGroup);
     const player = this.createPlayer();
-    capturablesSource.forEach(capturableData => {
-      this.spawnCapturable(capturableData, platformGroup);
+    uniqueAxisPlatformsSource.forEach(platformData => {
+      this.spawnCapturable(platformData, platformGroup, UniqueAxisPlatform);
     });
 
     const killers = this.spawnKillers();
 
     const winPortalGroup = this.createPhysicsGroup();
-    const winPortal = winPortalGroup.create(this.world.width - 50, this.world.height - 85, 'winPortal'
-      )
-    ;
+    const winPortal = winPortalGroup.create(this.world.width - 50, this.world.height - 85, 'winPortal');
     winPortal.body.immovable = true;
 
     const cursors = this.input.keyboard.createCursorKeys();
@@ -219,10 +217,10 @@ export default class extends Phaser.State {
     return player;
   }
 
-  spawnCapturable(capturableData, platformGroup) {
+  spawnCapturable(capturableData, platformGroup, CapturableType) {
     const {x, y, asset = 'ground', bounds, initialVelocity} = capturableData;
 
-    const capturable = new Capturable({
+    const capturable = new CapturableType({
       game: this.game,
       x,
       y,
