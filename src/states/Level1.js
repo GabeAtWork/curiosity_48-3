@@ -75,7 +75,7 @@ export default class extends Level {
       this.spawnCapturable(platformData, platformGroup, UniqueAxisPlatform);
     });
 
-    const winPortal = this.spawnWinPortal(this.world.width - 50, this.world.height - 85);
+    const winPortal = this.spawnWinPortal(this.world.width - 28, this.world.height - 76);
 
     this.props = {
       banner,

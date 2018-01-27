@@ -2,6 +2,9 @@ import Phaser from 'phaser-ce/build/custom/phaser-split';
 
 export const RECORDING_STATE_CAPTURING = 'RECORDING_STATE_CAPTURING';
 export const RECORDING_STATE_PLAYING = 'RECORDING_STATE_PLAYING';
+export const GAME_STATE_PLAYING = 'GAME_STATE_PLAYING';
+export const GAME_STATE_LOST = 'GAME_STATE_LOST';
+export const GAME_STATE_WON = 'GAME_STATE_WON';
 
 export default class extends Phaser.State {
   setProp(name, value) {
@@ -10,6 +13,7 @@ export default class extends Phaser.State {
 
   preload() {
     this.load.spritesheet('curiosity', 'assets/images/curiosity.png', 32, 32);
+    this.load.spritesheet('win-portal', 'assets/images/win-portal.png', 32, 32);
   }
 
   create() {
@@ -98,19 +102,29 @@ export default class extends Phaser.State {
 
   gameOver() {
     const {player} = this.props;
-    this.displayGameEndUi('You died', '#993333', 'Restart', '#993333', () => {
-      this.game.state.start(this.levelReference, true, false);
-    });
+    if (this.props.state !== GAME_STATE_LOST) {
+      this.displayGameEndUi('You died', '#993333', 'Restart', '#993333', () => {
+        this.game.state.start(this.levelReference, true, false);
+      });
 
+      this.props.state = GAME_STATE_LOST;
+    }
     this.stopGame(player);
   }
 
   gameWon() {
-    const {player} = this.props;
-    this.displayGameEndUi('Level complete', '#fff', this.nextLevelText, '#fff', () => {
-      this.game.state.start(this.nextLevelReference, true, false);
-    });
+    const {player, winPortal} = this.props;
 
+    if (this.props.state !== GAME_STATE_WON) {
+      winPortal.animations.play('deploy');
+      winPortal.animations.currentAnim.onComplete.add(() => {
+        this.displayGameEndUi('Level complete', '#fff', this.nextLevelText, '#fff', () => {
+          this.game.state.start(this.nextLevelReference, true, false);
+        });
+      });
+
+      this.props.state = GAME_STATE_WON;
+    }
     this.stopGame(player);
   }
 
@@ -233,8 +247,11 @@ export default class extends Phaser.State {
 
   spawnWinPortal(x, y) {
     const winPortalGroup = this.createPhysicsGroup();
-    const winPortal = winPortalGroup.create(x, y, 'winPortal');
+    const winPortal = winPortalGroup.create(x, y, 'win-portal');
     winPortal.body.immovable = true;
+    winPortal.animations.add('deploy', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], 10, false);
+    winPortal.anchor.setTo(0.5, 0.5);
+    winPortal.scale.setTo(1.5, 1.5);
 
     return winPortal;
   }
