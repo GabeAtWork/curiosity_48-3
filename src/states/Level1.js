@@ -15,6 +15,7 @@ export default class extends Phaser.State {
 
   preload() {
     this.load.image('ground', 'assets/images/loader-bg.png');
+    this.load.image('loaderBar', 'assets/images/loader-bar.png');
   }
 
   create() {
@@ -66,6 +67,12 @@ export default class extends Phaser.State {
       this.spawnCapturable(capturableData, platformGroup);
     });
 
+    const killers = this.add.group();
+    killers.enableBody = true;
+
+    const spikes = killers.create(300, this.world.height - 72, 'loaderBar');
+    spikes.body.immovable = true;
+
     const cursors = this.input.keyboard.createCursorKeys();
 
     this.props = {
@@ -73,12 +80,23 @@ export default class extends Phaser.State {
       platformGroup,
       ground,
       player,
+      spikes,
       cursors,
       recordings: [],
     }
   }
 
   update() {
+    const {player, platformGroup, cursors, savedVelocity, spikes, pause} = this.props;
+
+    this.physics.arcade.overlap(player, spikes, () => this.gameOver(), null, this);
+
+    if (!pause) {
+      this.playGameLoop();
+    }
+  }
+
+  playGameLoop() {
     const {player, platformGroup, cursors, savedVelocity} = this.props;
     const hitPlatform = this.physics.arcade.collide(player, platformGroup);
 
@@ -99,11 +117,11 @@ export default class extends Phaser.State {
     }
 
     if (cursors.left.isDown) {
-      player.body.velocity.x = -50;
+      player.body.velocity.x = -20;
       player.animations.play('left');
     }
     else if (cursors.right.isDown) {
-      player.body.velocity.x = 50;
+      player.body.velocity.x = 20;
       player.animations.play('right');
     }
     else {
@@ -143,7 +161,7 @@ export default class extends Phaser.State {
     const hiddenY = -50;
     const displayedY = 50;
 
-    let banner = this.add.text(this.world.centerX, hiddenY, bannerText, {
+    const banner = this.add.text(this.world.centerX, hiddenY, bannerText, {
       font: '40px Bangers',
       fill: '#449944',
       smoothed: false
@@ -238,5 +256,35 @@ export default class extends Phaser.State {
         }
         return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
       });
+  }
+
+  gameOver() {
+    const {player} = this.props;
+    const youDied = this.add.text(this.world.centerX, this.world.centerY - 50, 'You died', {
+      font: '60px Bangers',
+      fill: '#993333',
+      smoothed: false
+    });
+
+    youDied.padding.set(10, 16);
+    youDied.anchor.setTo(0.5);
+
+    const restart = this.add.text(this.world.centerX, this.world.centerY, 'Restart', {
+      font: '30px Bangers',
+      fill: '#993333',
+      smoothed: false
+    });
+    restart.padding.set(10, 16);
+    restart.anchor.setTo(0.5);
+
+    restart.inputEnabled = true;
+    restart.events.onInputDown.add(() => {
+      this.game.state.start('Level1', true, false);
+    });
+
+    this.props.pause = true;
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
+    player.body.gravity.y = 0;
   }
 }
