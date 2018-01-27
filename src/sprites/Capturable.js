@@ -1,19 +1,17 @@
 import Phaser from 'phaser'
 
 export default class extends Phaser.Sprite {
-  constructor({game, x, y, asset, level, bounds, initialVelocity}) {
+  constructor({game, x, y, asset, startRecording, bounds, initialVelocity}) {
     super(game, x, y, asset);
 
     this.props = {
-      level,
       bounds,
       initialVelocity,
     };
     this.scale.setTo(0.5, 1);
     this.inputEnabled = true;
     this.events.onInputDown.add(() => {
-      this.props.level.setProp('recordVelocityHistory', true);
-      this.props.level.setProp('recordedObject', this);
+      startRecording(this);
     });
   }
 
