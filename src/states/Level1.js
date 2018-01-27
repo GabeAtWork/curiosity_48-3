@@ -118,29 +118,8 @@ export default class extends Phaser.State {
 
     // Checking for the hold
     const isCapturing = !!this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
-
     const newVelocity = {x: 0, y: 0};
-    this.props.recordings = this.props.recordings
-      .filter(recording => recording.state !== RECORDING_STATE_PLAYING || recording.velocities.length)
-      .map((recording) => {
-        let {velocities, target, state, averageXVel, averageYVel} = recording;
-
-        if (state === RECORDING_STATE_CAPTURING) {
-          if (this.input.activePointer.isUp) {
-            state = RECORDING_STATE_PLAYING;
-            averageXVel = velocities.reduce((acc, vel) => acc + vel.x, 0) / velocities.length;
-            averageYVel = velocities.reduce((acc, vel) => acc + vel.y, 0) / velocities.length;
-          } else {
-            velocities.push(target.body.velocity);
-          }
-        }
-        if (state === RECORDING_STATE_PLAYING && velocities.length && !isCapturing) {
-          velocities.shift();
-          newVelocity.x += averageXVel;
-          newVelocity.y += averageYVel;
-        }
-        return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
-      });
+    this.props.recordings = this.calculateRecordings(isCapturing, newVelocity);
 
     if (Math.abs(newVelocity.x) > 0) {
       player.body.velocity.x = newVelocity.x;
@@ -235,5 +214,29 @@ export default class extends Phaser.State {
     capturable.body.immovable = true;
 
     return capturable
+  }
+
+  calculateRecordings(isCapturing, newVelocity) {
+    return this.props.recordings
+      .filter(recording => recording.state !== RECORDING_STATE_PLAYING || recording.velocities.length)
+      .map((recording) => {
+        let {velocities, target, state, averageXVel, averageYVel} = recording;
+
+        if (state === RECORDING_STATE_CAPTURING) {
+          if (this.input.activePointer.isUp) {
+            state = RECORDING_STATE_PLAYING;
+            averageXVel = velocities.reduce((acc, vel) => acc + vel.x, 0) / velocities.length;
+            averageYVel = velocities.reduce((acc, vel) => acc + vel.y, 0) / velocities.length;
+          } else {
+            velocities.push(target.body.velocity);
+          }
+        }
+        if (state === RECORDING_STATE_PLAYING && velocities.length && !isCapturing) {
+          velocities.shift();
+          newVelocity.x += averageXVel;
+          newVelocity.y += averageYVel;
+        }
+        return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
+      });
   }
 }
