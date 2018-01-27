@@ -3,6 +3,48 @@ import Capturable from '../sprites/Capturable';
 
 const RECORDING_STATE_CAPTURING = 'RECORDING_STATE_CAPTURING';
 const RECORDING_STATE_PLAYING = 'RECORDING_STATE_PLAYING';
+const GAME_STATE_PLAYING = 'GAME_STATE_PLAYING';
+const GAME_STATE_LOST = 'GAME_STATE_LOST';
+const GAME_STATE_WON = 'GAME_STATE_WON';
+
+const capturablesSource = [
+  {
+    x: 200,
+    y: 300,
+    bounds: {
+      x: {
+        min: 300,
+        max: 400
+      },
+      y: {
+        min: 300,
+        max: 400,
+      }
+    },
+    initialVelocity: {
+      x: 250,
+      y: 0,
+    }
+  },
+  {
+    x: 50,
+    y: 100,
+    bounds: {
+      x: {
+        min: 50,
+        max: 50
+      },
+      y: {
+        min: 50,
+        max: 350,
+      }
+    },
+    initialVelocity: {
+      x: 0,
+      y: 250,
+    }
+  }
+];
 
 export default class extends Phaser.State {
   init() {
@@ -22,56 +64,20 @@ export default class extends Phaser.State {
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
     const banner = this.createBanner();
-    const platformGroup = this.createPlatformsGroup();
+    const platformGroup = this.createPhysicsGroup();
     const ground = this.createGround(platformGroup);
     const player = this.createPlayer();
-    const capturablesSource = [
-      {
-        x: 200,
-        y: 300,
-        bounds: {
-          x: {
-            min: 300,
-            max: 400
-          },
-          y: {
-            min: 300,
-            max: 400,
-          }
-        },
-        initialVelocity: {
-          x: 250,
-          y: 0,
-        }
-      },
-      {
-        x: 50,
-        y: 100,
-        bounds: {
-          x: {
-            min: 50,
-            max: 50
-          },
-          y: {
-            min: 50,
-            max: 350,
-          }
-        },
-        initialVelocity: {
-          x: 0,
-          y: 250,
-        }
-      }
-    ];
     capturablesSource.forEach(capturableData => {
       this.spawnCapturable(capturableData, platformGroup);
     });
 
-    const killers = this.add.group();
-    killers.enableBody = true;
+    const killers = this.spawnKillers();
 
-    const spikes = killers.create(300, this.world.height - 72, 'loaderBar');
-    spikes.body.immovable = true;
+    const winPortalGroup = this.createPhysicsGroup();
+    const winPortal = winPortalGroup.create(this.world.width - 50, this.world.height - 85, 'winPortal'
+      )
+    ;
+    winPortal.body.immovable = true;
 
     const cursors = this.input.keyboard.createCursorKeys();
 
@@ -80,19 +86,26 @@ export default class extends Phaser.State {
       platformGroup,
       ground,
       player,
-      spikes,
+      killers,
       cursors,
+      winPortal,
+      gameState: GAME_STATE_PLAYING,
       recordings: [],
     }
   }
 
   update() {
-    const {player, platformGroup, cursors, savedVelocity, spikes, pause} = this.props;
+    const {player, killers, pause, winPortal, gameState} = this.props;
 
-    this.physics.arcade.overlap(player, spikes, () => this.gameOver(), null, this);
+    if (gameState === GAME_STATE_PLAYING) {
+      killers.forEach(killer => {
+        this.physics.arcade.overlap(player, killer, () => this.gameOver(), null, this);
+      });
+      this.physics.arcade.overlap(player, winPortal, () => this.gameWon(), null, this);
 
-    if (!pause) {
-      this.playGameLoop();
+      if (!pause) {
+        this.playGameLoop();
+      }
     }
   }
 
@@ -179,10 +192,10 @@ export default class extends Phaser.State {
     return banner;
   }
 
-  createPlatformsGroup() {
-    const platformGroup = this.add.group();
-    platformGroup.enableBody = true;
-    return platformGroup;
+  createPhysicsGroup() {
+    const physicsGroup = this.add.group();
+    physicsGroup.enableBody = true;
+    return physicsGroup;
   }
 
   createGround(platformGroup) {
@@ -234,6 +247,18 @@ export default class extends Phaser.State {
     return capturable
   }
 
+  spawnKillers() {
+    const killers = this.createPhysicsGroup();
+    const spikes = killers.create(300, this.world.height - 72, 'loaderBar');
+    spikes.body.immovable = true;
+
+    const bottom = killers.create(0, this.world.height - 5);
+    bottom.body.immovable = true;
+    bottom.body.setSize(this.world.width, 5);
+
+    return killers;
+  }
+
   calculateRecordings(isCapturing, newVelocity) {
     return this.props.recordings
       .filter(recording => recording.state !== RECORDING_STATE_PLAYING || recording.velocities.length)
@@ -282,6 +307,37 @@ export default class extends Phaser.State {
       this.game.state.start('Level1', true, false);
     });
 
+    this.stopGame(player);
+  }
+
+  gameWon() {
+    const {player} = this.props;
+    const youDied = this.add.text(this.world.centerX, this.world.centerY - 50, 'Level complete', {
+      font: '60px Bangers',
+      fill: '#993333',
+      smoothed: false
+    });
+
+    youDied.padding.set(10, 16);
+    youDied.anchor.setTo(0.5);
+
+    const nextLevel = this.add.text(this.world.centerX, this.world.centerY, 'Back to menu', {
+      font: '30px Bangers',
+      fill: '#993333',
+      smoothed: false
+    });
+    nextLevel.padding.set(10, 16);
+    nextLevel.anchor.setTo(0.5);
+
+    nextLevel.inputEnabled = true;
+    nextLevel.events.onInputDown.add(() => {
+      this.game.state.start('Game', true, false);
+    });
+
+    this.stopGame(player);
+  }
+
+  stopGame(player) {
     this.props.pause = true;
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
