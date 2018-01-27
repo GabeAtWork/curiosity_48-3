@@ -2,7 +2,6 @@ import Capturable from './Capturable';
 
 export default class extends Capturable {
   constructor(properties) {
-    const {game, x, y, asset, startRecording, bounds, initialVelocity} = properties;
     super(properties);
   }
 

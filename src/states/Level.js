@@ -1,0 +1,251 @@
+import Phaser from 'phaser-ce/build/custom/phaser-split';
+
+export const RECORDING_STATE_CAPTURING = 'RECORDING_STATE_CAPTURING';
+export const RECORDING_STATE_PLAYING = 'RECORDING_STATE_PLAYING';
+
+export default class extends Phaser.State {
+  setProp(name, value) {
+    this.props[name] = value;
+  }
+
+  create() {
+    this.physics.startSystem(Phaser.Physics.ARCADE);
+  }
+
+  update() {
+    const {killers, player, winPortal, pause} = this.props;
+
+    killers.forEach(killer => {
+      this.physics.arcade.overlap(player, killer, () => this.gameOver(), null, this);
+    });
+    this.physics.arcade.overlap(player, winPortal, () => this.gameWon(), null, this);
+
+    if (!pause) {
+      this.playGameLoop();
+    }
+  }
+
+  playGameLoop() {
+    const {player, groundGroup, cursors, savedVelocity} = this.props;
+    const hitGround = this.physics.arcade.collide(player, groundGroup);
+
+    // On restaure la vélocité sauvegardée
+    if (savedVelocity) {
+      player.body.velocity.x = savedVelocity.x;
+      player.body.velocity.y = savedVelocity.y;
+      this.props.savedVelocity = null;
+    }
+
+    // Ralentissement
+    if (player.body.velocity.x > 10) {
+      player.body.velocity.x -= 10;
+    } else if (player.body.velocity.x >= -10) {
+      player.body.velocity.x = 0;
+    } else {
+      player.body.velocity.x += 10;
+    }
+
+    if (cursors.left.isDown) {
+      player.body.velocity.x = -20;
+      player.animations.play('left');
+    }
+    else if (cursors.right.isDown) {
+      player.body.velocity.x = 20;
+      player.animations.play('right');
+    }
+    else {
+      player.animations.stop();
+      player.frame = 4;
+    }
+
+    // Jump
+    if (cursors.up.isDown && player.body.touching.down && hitGround) {
+      player.body.velocity.y = -100;
+    }
+
+    // Checking for the hold
+    const isCapturing = !!this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
+    const newVelocity = {x: 0, y: 0};
+    this.props.recordings = this.calculateRecordings(isCapturing, newVelocity);
+
+    if (Math.abs(newVelocity.x) > 0) {
+      player.body.velocity.x = newVelocity.x;
+    }
+    if (Math.abs(newVelocity.y) > 0) {
+      player.body.velocity.y = newVelocity.y;
+    }
+
+    if (isCapturing) {
+      player.body.gravity.y = 10;
+      this.props.savedVelocity = Object.assign({}, player.body.velocity);
+      player.body.velocity.x = player.body.velocity.x / 20;
+      player.body.velocity.y = player.body.velocity.y / 20;
+    } else {
+      player.body.gravity.y = 500;
+    }
+  }
+
+  gameOver() {
+    const {player} = this.props;
+    this.displayGameEndUi('You died', '#993333', 'Restart', '#993333', () => {
+      this.game.state.start(this.levelReference, true, false);
+    });
+
+    this.stopGame(player);
+  }
+
+  gameWon() {
+    const {player} = this.props;
+    this.displayGameEndUi('Level complete', '#fff', this.nextLevelText, '#fff', () => {
+      this.game.state.start(this.nextLevelReference, true, false);
+    });
+
+    this.stopGame(player);
+  }
+
+  displayGameEndUi(titleText, titleColor, buttonText, buttonColor, onClick) {
+    const title = this.add.text(this.world.centerX, this.world.centerY - 50, titleText, {
+      font: '60px Bangers',
+      fill: titleColor,
+      smoothed: false
+    });
+    title.padding.set(10, 16);
+    title.anchor.setTo(0.5);
+
+    const button = this.add.text(this.world.centerX, this.world.centerY, buttonText, {
+      font: '30px Bangers',
+      fill: buttonColor,
+      smoothed: false
+    });
+    button.padding.set(10, 16);
+    button.anchor.setTo(0.5);
+
+    button.inputEnabled = true;
+    button.events.onInputDown.add(onClick);
+  }
+
+  stopGame(player) {
+    this.props.pause = true;
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
+    player.body.gravity.y = 0;
+  }
+
+  createBanner() {
+    const hiddenY = -50;
+    const displayedY = 50;
+
+    const banner = this.add.text(this.world.centerX, hiddenY, this.bannerText, {
+      font: '40px Bangers',
+      fill: '#449944',
+      smoothed: false
+    });
+
+    banner.padding.set(10, 16);
+    banner.anchor.setTo(0.5);
+
+    this.add.tween(banner).to({y: displayedY}, 500, Phaser.Easing.Quartic.Out, true);
+    setTimeout(() => {
+      this.add.tween(banner).to({y: hiddenY}, 500, Phaser.Easing.Quartic.In, true);
+      this.add.tween(banner).to({alpha: 0}, 500, 'Linear', true);
+    }, 2000);
+
+    return banner;
+  }
+
+  createPhysicsGroup() {
+    const physicsGroup = this.add.group();
+    physicsGroup.enableBody = true;
+    return physicsGroup;
+  }
+
+  createGround(group, x, y) {
+    const ground = group.create(x, y, 'ground');
+    ground.body.immovable = true;
+
+    return ground;
+  }
+
+  createPlayer(x, y) {
+    const player = this.add.sprite(x, y, 'dude');
+
+    this.physics.arcade.enable(player);
+
+    player.body.bounce.y = 0.5;
+    player.body.gravity.y = 500;
+    player.body.collideWorldBounds = true;
+    return player;
+  }
+
+  spawnCapturable(capturableData, platformGroup, CapturableType) {
+    const {x, y, asset = 'ground', bounds, initialVelocity} = capturableData;
+
+    const capturable = new CapturableType({
+      game: this.game,
+      x,
+      y,
+      asset,
+      level: this,
+      bounds,
+      initialVelocity,
+      startRecording: () => {
+        this.props.recordings.push({
+          target: capturable,
+          velocities: [],
+          force: 0,
+          state: RECORDING_STATE_CAPTURING,
+          averageXVel: 0,
+          averageYVel: 0,
+        })
+      }
+    });
+    platformGroup.add(capturable);
+    capturable.body.velocity.x = initialVelocity.x;
+    capturable.body.velocity.y = initialVelocity.y;
+    capturable.body.immovable = true;
+
+    return capturable
+  }
+
+  spawnKillerGroup() {
+    const killers = this.createPhysicsGroup();
+
+    const bottom = killers.create(0, this.world.height - 5);
+    bottom.body.immovable = true;
+    bottom.body.setSize(this.world.width, 5);
+
+    return killers;
+  }
+
+  spawnWinPortal(x, y) {
+    const winPortalGroup = this.createPhysicsGroup();
+    const winPortal = winPortalGroup.create(x, y, 'winPortal');
+    winPortal.body.immovable = true;
+
+    return winPortal;
+  }
+
+  calculateRecordings(isCapturing, newVelocity) {
+    return this.props.recordings
+      .filter(recording => recording.state !== RECORDING_STATE_PLAYING || recording.velocities.length)
+      .map((recording) => {
+        let {velocities, target, state, averageXVel, averageYVel} = recording;
+
+        if (state === RECORDING_STATE_CAPTURING) {
+          if (this.input.activePointer.isUp) {
+            state = RECORDING_STATE_PLAYING;
+            averageXVel = velocities.reduce((acc, vel) => acc + vel.x, 0) / velocities.length;
+            averageYVel = velocities.reduce((acc, vel) => acc + vel.y, 0) / velocities.length;
+          } else {
+            velocities.push(target.body.velocity);
+          }
+        }
+        if (state === RECORDING_STATE_PLAYING && velocities.length && !isCapturing) {
+          velocities.shift();
+          newVelocity.x += averageXVel * 1.5;
+          newVelocity.y += averageYVel * 1.5;
+        }
+        return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
+      });
+  }
+}
