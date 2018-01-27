@@ -1,8 +1,13 @@
 import Phaser from 'phaser'
+import Capturable from '../sprites/Capturable';
 
 export default class extends Phaser.State {
   init() {
     this.stage.backgroundColor = '#86c1a6';
+  }
+
+  setProp(name, value) {
+    this.props[name] = value;
   }
 
   preload() {
@@ -16,13 +21,46 @@ export default class extends Phaser.State {
     const platformGroup = this.createPlatformsGroup();
     const ground = this.createGround(platformGroup);
     const player = this.createPlayer();
-    const velocityTestObject = platformGroup.create(250, 300, 'ground');
-    velocityTestObject.scale.setTo(0.5, 1);
-    velocityTestObject.body.velocity.x = 250;
-    velocityTestObject.inputEnabled = true;
-    velocityTestObject.events.onInputDown.add(() => {
-      this.props.recordVelocityHistory = true;
-      this.props.recordedObject = velocityTestObject;
+    const capturablesSource = [
+      {
+        x: 200,
+        y: 300,
+        bounds: {
+          x: {
+            min: 300,
+            max: 400
+          },
+          y: {
+            min: 300,
+            max: 400,
+          }
+        },
+        initialVelocity: {
+          x: 250,
+          y: 0,
+        }
+      },
+      {
+        x: 50,
+        y: 100,
+        bounds: {
+          x: {
+            min: 50,
+            max: 50
+          },
+          y: {
+            min: 50,
+            max: 350,
+          }
+        },
+        initialVelocity: {
+          x: 0,
+          y: 250,
+        }
+      }
+    ];
+    capturablesSource.forEach(capturableData => {
+      this.spawnCapturable(capturableData, platformGroup);
     });
 
     const cursors = this.input.keyboard.createCursorKeys();
@@ -33,7 +71,6 @@ export default class extends Phaser.State {
       ground,
       player,
       cursors,
-      velocityTestObject,
       velocityHistory: [],
       recordedObject: null,
       recordVelocityHistory: false,
@@ -42,7 +79,7 @@ export default class extends Phaser.State {
   }
 
   update() {
-    const {player, platformGroup, cursors, velocityTestObject, velocityHistory, recordedObject, recordVelocityHistory, playVelocityHistory} = this.props;
+    const {player, platformGroup, cursors, velocityHistory, recordedObject, recordVelocityHistory, playVelocityHistory} = this.props;
     const hitPlatform = this.physics.arcade.collide(player, platformGroup);
 
     player.body.velocity.x = 0;
@@ -65,23 +102,14 @@ export default class extends Phaser.State {
       player.body.velocity.y = -300;
     }
 
-    // Platform movement
-    if (velocityTestObject.x > 400) {
-      if (velocityTestObject.body.velocity.x > -250) {
-        velocityTestObject.body.velocity.x -= 5;
-      }
-    } else if (velocityTestObject.x < 300) {
-      if (velocityTestObject.body.velocity.x < 250) {
-        velocityTestObject.body.velocity.x += 5;
-      }
-    }
-
     // Checking for the hold
     if (recordVelocityHistory && recordedObject) {
-      velocityHistory.push(recordedObject.body.velocity.x);
+      velocityHistory.push(recordedObject.body.velocity);
     } else if (playVelocityHistory) {
       if (velocityHistory.length) {
-        player.body.velocity.x = velocityHistory.shift();
+        const newVelocity = velocityHistory.shift();
+        player.body.velocity.x = newVelocity.x;
+        player.body.velocity.y = newVelocity.y;
       } else {
         this.props.playVelocityHistory = false;
         this.props.velocityHistory = [];
@@ -136,9 +164,29 @@ export default class extends Phaser.State {
 
     this.physics.arcade.enable(player);
 
-    player.body.bounce.y = 0.1;
-    player.body.gravity.y = 1000;
+    player.body.bounce.y = 0.5;
+    player.body.gravity.y = 500;
     player.body.collideWorldBounds = true;
     return player;
+  }
+
+  spawnCapturable(capturableData, platformGroup) {
+    const {x, y, asset = 'ground', bounds, initialVelocity} = capturableData;
+
+    const capturable = new Capturable({
+      game: this.game,
+      x,
+      y,
+      asset,
+      level: this,
+      bounds,
+      initialVelocity,
+    });
+    platformGroup.add(capturable);
+    capturable.body.velocity.x = initialVelocity.x;
+    capturable.body.velocity.y = initialVelocity.y;
+    capturable.body.immovable = true;
+
+    return capturable
   }
 }
