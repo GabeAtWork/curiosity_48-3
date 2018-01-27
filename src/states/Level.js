@@ -167,7 +167,7 @@ export default class extends Phaser.State {
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
     player.body.gravity.y = 0;
-    this.props.orbHalo.destroy();
+    this.props.laserGroup.alpha = 0;
   }
 
   createBanner() {
