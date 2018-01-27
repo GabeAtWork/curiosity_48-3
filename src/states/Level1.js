@@ -13,8 +13,8 @@ const capturablesSource = [
     y: 300,
     bounds: {
       x: {
-        min: 300,
-        max: 400
+        min: 150,
+        max: 500
       },
       y: {
         min: 300,
@@ -65,7 +65,8 @@ export default class extends Phaser.State {
 
     const banner = this.createBanner();
     const platformGroup = this.createPhysicsGroup();
-    const ground = this.createGround(platformGroup);
+    const groundGroup = this.createPhysicsGroup();
+    const ground = this.createGround(groundGroup);
     const player = this.createPlayer();
     capturablesSource.forEach(capturableData => {
       this.spawnCapturable(capturableData, platformGroup);
@@ -83,6 +84,7 @@ export default class extends Phaser.State {
 
     this.props = {
       banner,
+      groundGroup,
       platformGroup,
       ground,
       player,
@@ -110,8 +112,8 @@ export default class extends Phaser.State {
   }
 
   playGameLoop() {
-    const {player, platformGroup, cursors, savedVelocity} = this.props;
-    const hitPlatform = this.physics.arcade.collide(player, platformGroup);
+    const {player, groundGroup, platformGroup, cursors, savedVelocity} = this.props;
+    const hitGround = this.physics.arcade.collide(player, groundGroup);
 
     // On restaure la vélocité sauvegardée
     if (savedVelocity) {
@@ -143,7 +145,7 @@ export default class extends Phaser.State {
     }
 
     // Jump
-    if (cursors.up.isDown && player.body.touching.down && hitPlatform) {
+    if (cursors.up.isDown && player.body.touching.down && hitGround) {
       player.body.velocity.y = -50;
     }
 
