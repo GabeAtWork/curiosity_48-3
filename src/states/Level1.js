@@ -136,6 +136,8 @@ export default class extends Phaser.State {
         }
         if (state === RECORDING_STATE_PLAYING && velocities.length && !isCapturing) {
           velocities.shift();
+          newVelocity.x += averageXVel;
+          newVelocity.y += averageYVel;
         }
         return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
       });
