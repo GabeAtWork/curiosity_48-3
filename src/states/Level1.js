@@ -79,10 +79,24 @@ export default class extends Phaser.State {
   }
 
   update() {
-    const {player, platformGroup, cursors} = this.props;
+    const {player, platformGroup, cursors, savedVelocity} = this.props;
     const hitPlatform = this.physics.arcade.collide(player, platformGroup);
 
-    player.body.velocity.x = 0;
+    // On restaure la vélocité sauvegardée
+    if (savedVelocity) {
+      player.body.velocity.x = savedVelocity.x;
+      player.body.velocity.y = savedVelocity.y;
+      this.props.savedVelocity = null;
+    }
+
+    // Ralentissement
+    if (player.body.velocity.x > 10) {
+      player.body.velocity.x -= 10;
+    } else if (player.body.velocity.x >= -10) {
+      player.body.velocity.x = 0;
+    } else {
+      player.body.velocity.x += 10;
+    }
 
     if (cursors.left.isDown) {
       player.body.velocity.x = -50;
@@ -99,28 +113,48 @@ export default class extends Phaser.State {
 
     // Jump
     if (cursors.up.isDown && player.body.touching.down && hitPlatform) {
-      player.body.velocity.y = -300;
+      player.body.velocity.y = -50;
     }
 
     // Checking for the hold
+    const isCapturing = !!this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
+
+    const newVelocity = {x: 0, y: 0};
     this.props.recordings = this.props.recordings
       .filter(recording => recording.state !== RECORDING_STATE_PLAYING || recording.velocities.length)
       .map((recording) => {
-        let {velocities, target, state} = recording;
+        let {velocities, target, state, averageXVel, averageYVel} = recording;
 
         if (state === RECORDING_STATE_CAPTURING) {
           if (this.input.activePointer.isUp) {
             state = RECORDING_STATE_PLAYING;
+            averageXVel = velocities.reduce((acc, vel) => acc + vel.x, 0) / velocities.length;
+            averageYVel = velocities.reduce((acc, vel) => acc + vel.y, 0) / velocities.length;
           } else {
             velocities.push(target.body.velocity);
           }
-        } else if (recording.velocities.length) {
-          const newVelocity = velocities.shift();
-          player.body.velocity.x = newVelocity.x;
-          player.body.velocity.y = newVelocity.y;
         }
-        return Object.assign({}, recording, {velocities, state});
+        if (state === RECORDING_STATE_PLAYING && velocities.length && !isCapturing) {
+          velocities.shift();
+        }
+        return Object.assign({}, recording, {velocities, state, averageXVel, averageYVel});
       });
+
+    if (Math.abs(newVelocity.x) > 0) {
+      player.body.velocity.x = newVelocity.x;
+    }
+    if (Math.abs(newVelocity.y) > 0) {
+      player.body.velocity.y = newVelocity.y;
+    }
+
+    if (isCapturing) {
+      player.body.gravity.y = 10;
+      this.props.savedVelocity = Object.assign({}, player.body.velocity);
+      player.body.velocity.x = player.body.velocity.x / 20;
+      player.body.velocity.y = player.body.velocity.y / 20;
+    } else {
+      player.body.gravity.y = 500;
+    }
   }
 
   createBanner() {
@@ -183,11 +217,13 @@ export default class extends Phaser.State {
       bounds,
       initialVelocity,
       startRecording: () => {
-        console.log('yo');
         this.props.recordings.push({
           target: capturable,
           velocities: [],
-          state: RECORDING_STATE_CAPTURING
+          force: 0,
+          state: RECORDING_STATE_CAPTURING,
+          averageXVel: 0,
+          averageYVel: 0,
         })
       }
     });
