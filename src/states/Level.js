@@ -8,6 +8,10 @@ export default class extends Phaser.State {
     this.props[name] = value;
   }
 
+  preload() {
+    this.load.spritesheet('curiosity', 'assets/images/curiosity.png', 32, 32);
+  }
+
   create() {
     this.physics.startSystem(Phaser.Physics.ARCADE);
   }
@@ -46,16 +50,23 @@ export default class extends Phaser.State {
     }
 
     if (cursors.left.isDown) {
+      player.animations.stop();
       player.body.velocity.x = -20;
-      player.animations.play('left');
+      player.angle = -10;
     }
     else if (cursors.right.isDown) {
+      player.animations.stop();
       player.body.velocity.x = 20;
-      player.animations.play('right');
+      player.angle = 10;
     }
     else {
-      player.animations.stop();
-      player.frame = 4;
+      player.angle = 0;
+
+      if (player.body.velocity.x === 0 && hitGround) {
+        player.animations.play('idle');
+      } else {
+        player.animations.stop();
+      }
     }
 
     // Jump
@@ -167,7 +178,10 @@ export default class extends Phaser.State {
   }
 
   createPlayer(x, y) {
-    const player = this.add.sprite(x, y, 'dude');
+    const player = this.add.sprite(x, y, 'curiosity');
+
+    player.animations.add('idle', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], 10, true);
+    player.anchor.setTo(0.5, 0.5);
 
     this.physics.arcade.enable(player);
 

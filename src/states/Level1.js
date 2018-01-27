@@ -45,7 +45,8 @@ export default class extends Level {
     this.stage.backgroundColor = '#86c1a6';
   }
 
-  preload() {
+  preload(game) {
+    super.preload(game);
     this.load.image('ground', 'assets/images/loader-bg.png');
     this.load.image('loaderBar', 'assets/images/loader-bar.png');
   }
