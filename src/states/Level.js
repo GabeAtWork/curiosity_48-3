@@ -15,8 +15,11 @@ export default class extends Phaser.State {
     this.load.spritesheet('curiosity', 'assets/images/curiosity.png', 32, 32);
     this.load.spritesheet('win-portal', 'assets/images/win-portal.png', 32, 32);
     this.load.image('background', 'assets/images/Background.png');
+    this.load.image('background-tower', 'assets/images/environment/BackgroundAsset_01.png');
     this.load.image('fog', 'assets/images/Background_Fog.png');
-    this.load.image('foliage', 'assets/images/environment/Foliage_01.png');
+    this.load.image('foliage-a', 'assets/images/environment/Foliage_01.png');
+    this.load.image('foliage-b', 'assets/images/environment/Foliage_02.png');
+    this.load.image('foliage-c', 'assets/images/environment/Foliage_03.png');
     this.load.spritesheet('orb-hover', 'assets/images/effects/Orbe_hover.png', 32, 32);
     this.load.image('orb-halo', 'assets/images/effects/halo_orbe_hold.png');
   }
@@ -24,6 +27,8 @@ export default class extends Phaser.State {
   create() {
     this.physics.startSystem(Phaser.Physics.ARCADE);
     this.background = this.add.sprite(0, 0, 'background');
+    this.backgroundTower = this.add.sprite(135, 80, 'background-tower');
+    this.backgroundTower.scale.setTo(2.5, 2.5);
     this.fog = this.add.sprite(0, 0, 'fog');
   }
 

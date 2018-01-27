@@ -74,11 +74,24 @@ export default class extends Level {
     super.create();
 
     const killers = this.spawnKillerGroup();
+    const envGroup = this.add.group();
     const groundGroup = this.createPhysicsGroup();
-    const ground1 = this.createGround(groundGroup, 0, this.world.height - 64, 'ground1');
-    const ground2 = this.createGround(groundGroup, this.world.width - 192, this.world.height - 128, 'ground2');
-    const ground3 = this.createGround(groundGroup, this.world.width - 192 - 195, this.world.height - 32, 'ground3');
+
+    const ground2X = this.world.width - 192;
+    const ground3X = this.world.width - 192 - 195;
+    const ground1Y = this.world.height - 64;
+    const ground2Y = this.world.height - 128;
+    const ground3Y = this.world.height - 32;
+    const ground1 = this.createGround(groundGroup, 0, ground1Y, 'ground1');
+    const ground2 = this.createGround(groundGroup, ground2X, ground2Y, 'ground2');
+    const ground3 = this.createGround(groundGroup, ground3X, ground3Y, 'ground3');
+
     const player = this.createPlayer(32, this.world.height - 150);
+
+    const foliageHeight = 64;
+    const foliage1 = envGroup.create(76, ground1Y - foliageHeight, 'foliage-a');
+    foliage1.scale.setTo(-1, 1);
+    const foliage2 = envGroup.create(ground2X + 10, ground2Y - foliageHeight, 'foliage-a');
 
     const spikes = this.add.tileSprite(this.world.width - 192 - 195, this.world.height - 50, 195, 32, 'spikes');
     killers.add(spikes);
