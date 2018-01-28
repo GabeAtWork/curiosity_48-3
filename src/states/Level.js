@@ -17,6 +17,7 @@ export default class extends Phaser.State {
     this.load.spritesheet('win-portal', 'assets/images/win-portal.png', 32, 32);
     this.load.image('background', 'assets/images/Background.png');
     this.load.image('background-tower', 'assets/images/environment/BackgroundAsset_01.png');
+    this.load.image('moon', 'assets/images/environment/background_asset_02.png');
     this.load.image('fog', 'assets/images/Background_Fog.png');
     this.load.image('foliage-a', 'assets/images/environment/Foliage_01.png');
     this.load.image('foliage-b', 'assets/images/environment/Foliage_02.png');
@@ -35,6 +36,11 @@ export default class extends Phaser.State {
   create(addTower) {
     this.physics.startSystem(Phaser.Physics.ARCADE);
     this.background = this.add.sprite(0, 0, 'background');
+    this.moon = this.add.sprite(100, 90, 'moon');
+    this.moon2 = this.add.sprite(this.world.width - 150, 10, 'moon');
+    this.moon2.scale.setTo(2, 2);
+    this.moon2.anchor.setTo(0.5);
+    this.moon2.alpha = 0.7;
     if (addTower) {
       addTower();
     }
