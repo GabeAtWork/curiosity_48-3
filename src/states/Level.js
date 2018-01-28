@@ -13,6 +13,7 @@ export default class extends Phaser.State {
 
   preload() {
     this.load.spritesheet('curiosity', 'assets/images/curiosity.png', 32, 32);
+    this.load.spritesheet('player-halo', 'assets/images/effects/Curiosity_charging_halo.png', 64, 64);
     this.load.spritesheet('win-portal', 'assets/images/win-portal.png', 32, 32);
     this.load.image('background', 'assets/images/Background.png');
     this.load.image('background-tower', 'assets/images/environment/BackgroundAsset_01.png');
@@ -106,6 +107,7 @@ export default class extends Phaser.State {
     const isCapturing = !!this.props.recordings.find(recording => recording.state === RECORDING_STATE_CAPTURING);
     const newVelocity = {x: 0, y: 0};
     this.props.recordings = this.calculateRecordings(isCapturing, newVelocity);
+    this.setPlayerHalo(isCapturing);
 
     if (Math.abs(newVelocity.x) > 0) {
       player.body.velocity.x = newVelocity.x;
@@ -234,6 +236,21 @@ export default class extends Phaser.State {
     player.body.gravity.y = 500;
     player.body.collideWorldBounds = true;
     return player;
+  }
+
+  createPlayerHalo(player) {
+    const playerHalo = this.add.sprite(player.x, player.y, 'player-halo');
+    playerHalo.animations.add('idle', [0, 1, 2, 3, 4, 5, 6], 10, true);
+    playerHalo.anchor.setTo(0.5, 0.5);
+    playerHalo.animations.play('idle');
+    return playerHalo;
+  }
+
+  setPlayerHalo(isCapturing) {
+    const {player, playerHalo} = this.props;
+    playerHalo.x = player.x;
+    playerHalo.y = player.y;
+    playerHalo.alpha = isCapturing ? 1 : 0;
   }
 
   spawnCapturable(capturableData, platformGroup, CapturableType) {

@@ -121,6 +121,7 @@ export default class extends Level {
       }), platformGroup, UniqueAxisPlatform);
     });
     const player = this.createPlayer(32, this.world.height - 150);
+    const playerHalo = this.createPlayerHalo(player);
 
     const banner = this.createBanner();
 
@@ -135,6 +136,7 @@ export default class extends Level {
       groundGroup,
       platformGroup,
       player,
+      playerHalo,
       killers,
       laserGroup,
       cursors,
