@@ -1,4 +1,5 @@
 /* globals __DEV__ */
+import Phaser from 'phaser-ce';
 import UniqueAxisPlatform from '../sprites/UniqueAxisPlatform';
 import Level, {GAME_STATE_PLAYING} from './Level';
 
@@ -39,10 +40,13 @@ export default class extends Level {
   }
 
   create() {
+    this.world.alpha = 0;
+    this.add.tween(this.world).to({alpha: 1}, 1500, Phaser.Easing.Linear.None, true);
+
     this.levelReference = 'Level0';
     this.nextLevelReference = 'Level1';
-    this.bannerText = 'Tutorial';
-    this.nextLevelText = 'Next level';
+    this.bannerText = 'Out into the wild...';
+    this.nextLevelText = '> Next level';
 
     super.create(() => {
       this.backgroundTower = this.add.sprite(this.world.width - 50, this.world.height - 150, 'background-tower');

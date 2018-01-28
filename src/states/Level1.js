@@ -64,7 +64,7 @@ export default class extends Level {
     this.levelReference = 'Level1';
     this.nextLevelReference = 'Level2';
     this.bannerText = 'Level 1';
-    this.nextLevelText = 'Next level';
+    this.nextLevelText = '> Next level';
 
     super.create(() => {
       this.backgroundTower = this.add.sprite(135, 80, 'background-tower');
