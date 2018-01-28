@@ -10,7 +10,7 @@ export default class extends Capturable {
     const currentVelocity = this.body.velocity[directionName];
     const maxBound = this.props.bounds[directionName].max;
     const minBound = this.props.bounds[directionName].min;
-    const initialVelocity = this.props.initialVelocity[directionName];
+    const initialVelocity = Math.abs(this.props.initialVelocity[directionName]);
     const minVelocity = 50;
     const directionChangeAdjustement = initialVelocity - minVelocity;
     const slowDownEasingStep = 10;

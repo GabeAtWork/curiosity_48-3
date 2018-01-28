@@ -57,7 +57,6 @@ export default class extends Level {
     this.load.image('ground1', 'assets/images/levels/one/Level_01_Ground_01.png');
     this.load.image('ground2', 'assets/images/levels/one/Level_01_Ground_02.png');
     this.load.image('ground3', 'assets/images/levels/one/Level_01_Ground_03.png');
-    this.load.image('spikes', 'assets/images/Spikes.png');
     this.load.image('decoration', 'assets/images/levels/one/level01_foliage.png');
   }
 
@@ -84,6 +83,8 @@ export default class extends Level {
 
     const player = this.createPlayer(32, this.world.height - 150);
 
+    this.backgroundTower = this.add.sprite(135, 80, 'background-tower');
+    this.backgroundTower.scale.setTo(2.5, 2.5);
     envGroup.create(0, 0, 'decoration');
     /*const foliageHeight = 64;
     const foliage1 = envGroup.create(76, ground1Y - foliageHeight, 'foliage-a');
