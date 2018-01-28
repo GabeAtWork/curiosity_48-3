@@ -22,6 +22,11 @@ export default class extends Phaser.State {
     this.load.image('foliage-c', 'assets/images/environment/Foliage_03.png');
     this.load.spritesheet('orb-hover', 'assets/images/effects/Orbe_hover.png', 32, 32);
     this.load.image('orb-halo', 'assets/images/effects/halo_orbe_hold.png');
+    this.load.image('spikes', 'assets/images/Spikes.png');
+    this.load.image('orb-1', 'assets/images/orbs/Orbe01.png');
+    this.load.image('orb-1-active', 'assets/images/orbs/Orbe01_Active.png');
+    this.load.image('orb-2', 'assets/images/orbs/Orbe02.png');
+    this.load.image('orb-2-active', 'assets/images/orbs/Orbe02_Active.png');
   }
 
   create() {

@@ -58,11 +58,7 @@ export default class extends Level {
     this.load.image('ground2', 'assets/images/levels/one/Level_01_Ground_02.png');
     this.load.image('ground3', 'assets/images/levels/one/Level_01_Ground_03.png');
     this.load.image('spikes', 'assets/images/Spikes.png');
-    this.load.image('orb-1', 'assets/images/orbs/Orbe01.png');
-    this.load.image('orb-1-active', 'assets/images/orbs/Orbe01_Active.png');
-    this.load.image('orb-2', 'assets/images/orbs/Orbe02.png');
-    this.load.image('orb-2-active', 'assets/images/orbs/Orbe02_Active.png');
-    this.load.image('spikes', 'assets/images/Spikes.png');
+    this.load.image('decoration', 'assets/images/levels/one/level01_foliage.png');
   }
 
   create() {
@@ -88,10 +84,11 @@ export default class extends Level {
 
     const player = this.createPlayer(32, this.world.height - 150);
 
-    const foliageHeight = 64;
+    envGroup.create(0, 0, 'decoration');
+    /*const foliageHeight = 64;
     const foliage1 = envGroup.create(76, ground1Y - foliageHeight, 'foliage-a');
     foliage1.scale.setTo(-1, 1);
-    const foliage2 = envGroup.create(ground2X + 10, ground2Y - foliageHeight, 'foliage-a');
+    const foliage2 = envGroup.create(ground2X + 10, ground2Y - foliageHeight, 'foliage-a');*/
 
     const spikes = this.add.tileSprite(this.world.width - 192 - 195, this.world.height - 50, 195, 32, 'spikes');
     killers.add(spikes);
