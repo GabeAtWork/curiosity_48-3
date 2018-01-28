@@ -152,10 +152,6 @@ export default class extends Phaser.State {
     }
 
     this.renderLaser();
-    if (player.body.blocked.up || player.body.blocked.down || player.body.blocked.left || player.body.blocked.right) {
-      console.log('playingSound');
-      impactSound.play();
-    }
   }
 
   gameOver() {
