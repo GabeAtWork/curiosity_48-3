@@ -73,19 +73,19 @@ export default class extends Level {
 
   preload() {
     super.preload();
-    this.load.image('decoration', 'assets/images/levels/two/level02_foliage.png');
-    this.load.image('ground1', 'assets/images/levels/two/level02_ground_01.png');
-    this.load.image('ground2', 'assets/images/levels/two/level02_ground_02.png');
-    this.load.image('ground3', 'assets/images/levels/two/level02_ground_03.png');
-    this.load.image('ground4', 'assets/images/levels/two/level02_ground_04.png');
-    this.load.image('ground5', 'assets/images/levels/two/level02_ground_05.png');
+    this.load.image('decoration', 'assets/images/levels/three/level_03_foliage.png');
+    this.load.image('ground1', 'assets/images/levels/three/level_03_ground01.png');
+    this.load.image('ground2', 'assets/images/levels/three/level_03_ground02.png');
+    this.load.image('ground3', 'assets/images/levels/three/level_03_ground03.png');
+    this.load.image('ground4', 'assets/images/levels/three/level_03_ground04.png');
+    this.load.image('ground5', 'assets/images/levels/three/level_03_ground05.png');
   }
 
   create() {
-    this.levelReference = 'Level2';
-    this.nextLevelReference = 'Level3';
-    this.bannerText = 'Level 2';
-    this.nextLevelText = '> Next level';
+    this.levelReference = 'Level3';
+    this.nextLevelReference = 'EndScreen';
+    this.bannerText = 'Level 3';
+    this.nextLevelText = '> Debrief';
 
     const parentProps = super.create(() => {
       this.backgroundTower = this.add.sprite(0, this.world.height - 140, 'background-tower');
@@ -99,21 +99,19 @@ export default class extends Level {
     const envGroup = this.add.group();
     const groundGroup = this.createPhysicsGroup();
     const ground1 = this.createGround(groundGroup, 0, this.world.height - 64, 'ground1');
-    const ground2 = this.createGround(groundGroup, 201, 0, 'ground2');
-    const ground3 = this.createGround(groundGroup, 332, this.world.height - 224, 'ground3');
-    const ground4 = this.createGround(groundGroup, this.world.width - 247, this.world.height - 32, 'ground4');
-    const ground5 = this.createGround(groundGroup, this.world.width - 185, this.world.height - 190, 'ground5');
+    const ground2 = this.createGround(groundGroup, 0, -10, 'ground2');
+    const ground3 = this.createGround(groundGroup, 6 * 32, this.world.height - 192 - 32, 'ground3');
+    const ground4 = this.createGround(groundGroup, 12 * 32, this.world.height - 192 - 32, 'ground4');
+    const ground5 = this.createGround(groundGroup, this.world.width - 32, this.world.height - 224, 'ground5');
     envGroup.create(0, 0, 'decoration');
 
-    const spike1 = this.add.tileSprite(340, this.world.height - 240, 48, 32, 'spikes');
+    const spike1 = this.add.tileSprite(0, 35, this.world.width, 32, 'spikes');
     killers.add(spike1);
     spike1.body.immovable = true;
-    const spike2 = this.add.tileSprite(this.world.width - 247, this.world.height - 48, 247, 32, 'spikes');
-    killers.add(spike2);
-    spike2.body.immovable = true;
+    spike1.scale.set(1, -1);
 
     const laserGroup = this.add.group();
-    const winPortal = this.spawnWinPortal(this.world.width - 80, this.world.height - 190 - 24);
+    const winPortal = this.spawnWinPortal(this.world.width - 16, this.world.height - 224 - 24);
     const platformGroup = this.createPhysicsGroup();
     uniqueAxisPlatformsSource.forEach(platformData => {
       this.spawnCapturable(Object.assign({}, platformData, {

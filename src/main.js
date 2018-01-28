@@ -9,6 +9,7 @@ import Intro from './states/Intro';
 import Tutorial from './states/Tutorial';
 import Level1 from './states/Level1';
 import Level2 from './states/Level2';
+import Level3 from './states/Level3';
 import EndScreen from './states/EndScreen';
 
 class Game extends Phaser.Game {
@@ -26,6 +27,7 @@ class Game extends Phaser.Game {
     this.state.add('Tutorial', Tutorial, false);
     this.state.add('Level1', Level1, false);
     this.state.add('Level2', Level2, false);
+    this.state.add('Level3', Level3, false);
     this.state.add('EndScreen', EndScreen, false);
 
     // with Cordova with need to wait that the device is ready so we will call the Boot state in another file
