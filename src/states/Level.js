@@ -129,7 +129,7 @@ export default class extends Phaser.State {
   gameOver() {
     const {player} = this.props;
     if (this.props.state !== GAME_STATE_LOST) {
-      this.displayGameEndUi('You died', '#993333', 'Restart', '#993333', () => {
+      this.displayGameEndUi('You died', '#FF0101', 'Restart', '#FF0101', () => {
         this.game.state.start(this.levelReference, true, false);
       });
 
@@ -162,8 +162,9 @@ export default class extends Phaser.State {
     });
     title.padding.set(10, 16);
     title.anchor.setTo(0.5);
+    title.setShadow(-1, 1, 'rgba(0,0,0,0.5)', 0);
 
-    const button = this.add.text(this.world.centerX, this.world.centerY, buttonText.toUpperCase(), {
+    const button = this.add.text(this.world.centerX, this.world.centerY + 100, buttonText.toUpperCase(), {
       font: '30px Raleway',
       fill: buttonColor,
       smoothed: false
@@ -172,6 +173,8 @@ export default class extends Phaser.State {
     button.anchor.setTo(0.5);
 
     button.inputEnabled = true;
+    button.input.useHandCursor = true;
+    button.setShadow(-1, 1, 'rgba(0,0,0,0.5)', 0);
     button.events.onInputDown.add(onClick);
   }
 
@@ -189,12 +192,13 @@ export default class extends Phaser.State {
 
     const banner = this.add.text(this.world.centerX, hiddenY, this.bannerText.toUpperCase(), {
       font: '40px Raleway',
-      fill: '#449944',
+      fill: '#fff',
       smoothed: false
     });
 
     banner.padding.set(10, 16);
     banner.anchor.setTo(0.5);
+    banner.setShadow(-1, 1, 'rgba(0,0,0,0.5)', 0);
 
     this.add.tween(banner).to({y: displayedY}, 500, Phaser.Easing.Quartic.Out, true);
     setTimeout(() => {
