@@ -67,7 +67,7 @@ export default class extends Phaser.State {
     startButton.inputEnabled = true;
     startButton.alpha = 0;
     startButton.events.onInputDown.add(() => {
-      this.state.start('Intro', true);
+      this.state.start('Game', true);
     });
     startButton.setShadow(-1, 1, 'rgba(0,0,0,0.5)', 0);
     startButton.input.useHandCursor = true;
