@@ -243,14 +243,15 @@ export default class extends Phaser.State {
       game: this.game,
       level: this,
       startRecording: () => {
-        this.props.recordings.push({
+        const newRecording = {
           target: capturable,
           velocities: [],
           force: 0,
           state: RECORDING_STATE_CAPTURING,
           averageXVel: 0,
           averageYVel: 0,
-        });
+        };
+        this.props.recordings.push(newRecording);
       }
     }));
     platformGroup.add(capturable);
@@ -289,7 +290,7 @@ export default class extends Phaser.State {
         let {velocities, target, state, averageXVel, averageYVel} = recording;
 
         if (state === RECORDING_STATE_CAPTURING) {
-          if (this.input.activePointer.isUp) {
+          if (this.input.activePointer.isUp || velocities.length > 50) {
             state = RECORDING_STATE_PLAYING;
             averageXVel = velocities.reduce((acc, vel) => acc + vel.x, 0) / velocities.length;
             averageYVel = velocities.reduce((acc, vel) => acc + vel.y, 0) / velocities.length;
