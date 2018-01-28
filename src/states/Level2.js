@@ -87,7 +87,12 @@ export default class extends Level {
     this.bannerText = 'Level 2';
     this.nextLevelText = 'Back to menu';
 
-    super.create();
+    super.create(() => {
+      this.backgroundTower = this.add.sprite(0, this.world.height - 140, 'background-tower');
+      this.backgroundTower.scale.setTo(1.5, 1.5);
+      this.backgroundTower.anchor.setTo(0.5, 0.5);
+      this.backgroundTower.alpha = 0.7;
+    });
 
     const killers = this.spawnKillerGroup();
     const envGroup = this.add.group();
@@ -97,7 +102,6 @@ export default class extends Level {
     const ground3 = this.createGround(groundGroup, 332, this.world.height - 224, 'ground3');
     const ground4 = this.createGround(groundGroup, this.world.width - 247, this.world.height - 32, 'ground4');
     const ground5 = this.createGround(groundGroup, this.world.width - 185, this.world.height - 190, 'ground5');
-    const player = this.createPlayer(32, this.world.height - 150);
     envGroup.create(0, 0, 'decoration');
 
     const spike1 = this.add.tileSprite(340, this.world.height - 240, 48, 32, 'spikes');
@@ -116,6 +120,7 @@ export default class extends Level {
         onHoverOut: target => this.onCapturableHoverOut(target),
       }), platformGroup, UniqueAxisPlatform);
     });
+    const player = this.createPlayer(32, this.world.height - 150);
 
     const banner = this.createBanner();
 

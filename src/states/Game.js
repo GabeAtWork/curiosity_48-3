@@ -26,7 +26,7 @@ export default class extends Phaser.State {
     callToClick.anchor.setTo(0.5);
     callToClick.inputEnabled = true;
     callToClick.events.onInputDown.add(() => {
-      this.state.start('Level1', true);
+      this.state.start('Tutorial', true);
     });
   }
 

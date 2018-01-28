@@ -31,9 +31,12 @@ export default class extends Phaser.State {
     this.load.image('orb-3-active', 'assets/images/orbs/Orbe03_Active.png');
   }
 
-  create() {
+  create(addTower) {
     this.physics.startSystem(Phaser.Physics.ARCADE);
     this.background = this.add.sprite(0, 0, 'background');
+    if (addTower) {
+      addTower();
+    }
     this.fog = this.add.sprite(0, 0, 'fog');
   }
 

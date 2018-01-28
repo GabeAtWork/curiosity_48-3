@@ -5,9 +5,9 @@ import config from './config';
 import BootState from './states/Boot';
 import SplashState from './states/Splash';
 import GameState from './states/Game';
+import Tutorial from './states/Tutorial';
 import Level1 from './states/Level1';
 import Level2 from './states/Level2';
-
 
 class Game extends Phaser.Game {
   constructor () {
@@ -20,6 +20,7 @@ class Game extends Phaser.Game {
     this.state.add('Boot', BootState, false);
     this.state.add('Splash', SplashState, false);
     this.state.add('Game', GameState, false);
+    this.state.add('Tutorial', Tutorial, false);
     this.state.add('Level1', Level1, false);
     this.state.add('Level2', Level2, false);
 

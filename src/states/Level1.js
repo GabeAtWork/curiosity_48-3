@@ -66,7 +66,11 @@ export default class extends Level {
     this.bannerText = 'Level 1';
     this.nextLevelText = 'Next level';
 
-    super.create();
+    super.create(() => {
+      this.backgroundTower = this.add.sprite(135, 80, 'background-tower');
+      this.backgroundTower.scale.setTo(2.5, 2.5);
+      this.backgroundTower.alpha = 0.7;
+    });
 
     const killers = this.spawnKillerGroup();
     const envGroup = this.add.group();
@@ -81,15 +85,7 @@ export default class extends Level {
     const ground2 = this.createGround(groundGroup, ground2X, ground2Y, 'ground2');
     const ground3 = this.createGround(groundGroup, ground3X, ground3Y, 'ground3');
 
-    const player = this.createPlayer(32, this.world.height - 150);
-
-    this.backgroundTower = this.add.sprite(135, 80, 'background-tower');
-    this.backgroundTower.scale.setTo(2.5, 2.5);
     envGroup.create(0, 0, 'decoration');
-    /*const foliageHeight = 64;
-    const foliage1 = envGroup.create(76, ground1Y - foliageHeight, 'foliage-a');
-    foliage1.scale.setTo(-1, 1);
-    const foliage2 = envGroup.create(ground2X + 10, ground2Y - foliageHeight, 'foliage-a');*/
 
     const spikes = this.add.tileSprite(this.world.width - 192 - 195, this.world.height - 50, 195, 32, 'spikes');
     killers.add(spikes);
@@ -103,6 +99,7 @@ export default class extends Level {
         onHoverOut: target => this.onCapturableHoverOut(target),
       }), platformGroup, UniqueAxisPlatform);
     });
+    const player = this.createPlayer(32, this.world.height - 150);
 
     const winPortal = this.spawnWinPortal(this.world.width - 28, this.world.height - 128 - 24);
 
