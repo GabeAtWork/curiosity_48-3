@@ -31,6 +31,12 @@ export default class extends Phaser.State {
     this.load.image('orb-2-active', 'assets/images/orbs/Orbe02_Active.png');
     this.load.image('orb-3', 'assets/images/orbs/Orbe03.png');
     this.load.image('orb-3-active', 'assets/images/orbs/Orbe03_Active.png');
+
+    this.load.audio('win-portal-activate', 'assets/sounds/Activate_EndRobot.wav');
+    this.load.audio('you-lost', 'assets/sounds/Dead.wav');
+    this.load.audio('you-died', 'assets/sounds/Dead_Explosion.wav');
+    this.load.audio('laser-connect', 'assets/sounds/Laser_Connect.wav');
+    this.load.audio('impact', 'assets/sounds/Impact.wav');
   }
 
   create(addTower) {
@@ -45,6 +51,20 @@ export default class extends Phaser.State {
       addTower();
     }
     this.fog = this.add.sprite(0, 0, 'fog');
+
+    const winPortalActivateSound = this.add.audio('win-portal-activate');
+    const youLostSound = this.add.audio('you-lost');
+    const youDiedSound = this.add.audio('you-died');
+    const laserConnectSound = this.add.audio('laser-connect');
+    const impactSound = this.add.audio('impact');
+
+    return {
+      winPortalActivateSound,
+      youLostSound,
+      youDiedSound,
+      laserConnectSound,
+      impactSound,
+    };
   }
 
   update() {
@@ -65,7 +85,7 @@ export default class extends Phaser.State {
   }
 
   playGameLoop() {
-    const {player, groundGroup, cursors, savedVelocity} = this.props;
+    const {player, groundGroup, cursors, savedVelocity, impactSound} = this.props;
     const hitGround = this.physics.arcade.collide(player, groundGroup);
 
     // On restaure la vélocité sauvegardée
@@ -132,11 +152,17 @@ export default class extends Phaser.State {
     }
 
     this.renderLaser();
+    if (player.body.blocked.up || player.body.blocked.down || player.body.blocked.left || player.body.blocked.right) {
+      console.log('playingSound');
+      impactSound.play();
+    }
   }
 
   gameOver() {
-    const {player} = this.props;
+    const {player, youLostSound, youDiedSound} = this.props;
     if (this.props.state !== GAME_STATE_LOST) {
+      youLostSound.play();
+      youDiedSound.play();
       this.displayGameEndUi('You died', '#FF0101', 'Restart', '#FF0101', () => {
         this.game.state.start(this.levelReference, true, false);
       });
@@ -147,10 +173,11 @@ export default class extends Phaser.State {
   }
 
   gameWon() {
-    const {player, winPortal} = this.props;
+    const {player, winPortal, winPortalActivateSound} = this.props;
 
     if (this.props.state !== GAME_STATE_WON) {
       winPortal.animations.play('deploy');
+      winPortalActivateSound.play();
       winPortal.animations.currentAnim.onComplete.add(() => {
         this.displayGameEndUi('Level complete', '#fff', this.nextLevelText, '#fff', () => {
           this.game.state.start(this.nextLevelReference, true, false);
@@ -264,6 +291,7 @@ export default class extends Phaser.State {
 
   spawnCapturable(capturableData, platformGroup, CapturableType) {
     const {initialVelocity} = capturableData;
+    const {laserConnectSound} = this.props;
 
     const capturable = new CapturableType(Object.assign({}, capturableData, {
       game: this.game,
@@ -278,6 +306,7 @@ export default class extends Phaser.State {
           averageYVel: 0,
         };
         this.props.recordings.push(newRecording);
+        laserConnectSound.play();
       }
     }));
     platformGroup.add(capturable);

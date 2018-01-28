@@ -17,6 +17,6 @@ export default class extends Phaser.State {
 
   create () {
     //TODO mettre Game
-    this.state.start('Game', true);
+    this.state.start('Level1', true);
   }
 }

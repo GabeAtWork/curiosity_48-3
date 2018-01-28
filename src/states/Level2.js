@@ -87,12 +87,13 @@ export default class extends Level {
     this.bannerText = 'Level 2';
     this.nextLevelText = 'Back to menu';
 
-    super.create(() => {
+    const parentProps = super.create(() => {
       this.backgroundTower = this.add.sprite(0, this.world.height - 140, 'background-tower');
       this.backgroundTower.scale.setTo(1.5, 1.5);
       this.backgroundTower.anchor.setTo(0.5, 0.5);
       this.backgroundTower.alpha = 0.7;
     });
+    this.props = parentProps;
 
     const killers = this.spawnKillerGroup();
     const envGroup = this.add.group();
@@ -131,7 +132,7 @@ export default class extends Level {
     orbHalo.anchor.setTo(0, 0);
     laserGroup.add(orbHalo);
 
-    this.props = {
+    this.props = Object.assign({}, parentProps, {
       banner,
       groundGroup,
       platformGroup,
@@ -145,6 +146,6 @@ export default class extends Level {
       gameState: GAME_STATE_PLAYING,
       recordings: [],
       hoveredCapturables: [],
-    }
+    });
   }
 }

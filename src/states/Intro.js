@@ -13,6 +13,8 @@ export default class extends Level {
     this.load.image('background-intro', 'assets/images/levels/intro/level_intro_background.png');
     this.load.spritesheet('the-thing', 'assets/images/levels/intro/level_intro_machine.png', 256, 256);
     this.load.spritesheet('curiosity-transform', 'assets/images/curiosity_transforme.png', 32, 32);
+
+    this.load.audio('curiosity-transform', 'assets/sounds/Curiosity_Transforme.wav');
   }
 
   create() {
@@ -50,6 +52,8 @@ export default class extends Level {
 
     const cursors = this.input.keyboard.createCursorKeys();
 
+    const curiosityTransformSound = this.add.audio('curiosity-transform');
+
     this.props = {
       groundGroup,
       player,
@@ -57,6 +61,7 @@ export default class extends Level {
       cursors,
       theThing,
       frozen: true,
+      curiosityTransformSound,
       gameState: GAME_STATE_PLAYING,
       recordings: [],
       hoveredCapturables: [],
@@ -101,7 +106,7 @@ export default class extends Level {
   }
 
   makeTransformGhost() {
-    const {player, theThing} = this.props;
+    const {player, theThing, curiosityTransformSound} = this.props;
     const transformGhost = this.add.sprite(player.x, player.y, 'player-before-transform');
 
     transformGhost.animations.add('transform-part-1', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], 10, false);
@@ -117,6 +122,7 @@ export default class extends Level {
         newForm.animations.add('appear', [0, 1, 2, 3, 4, 5, 6, 7, 8], 10, false);
         newForm.animations.play('appear');
         newForm.anchor.setTo(0.5, 0.5);
+        curiosityTransformSound.play();
         newForm.animations.currentAnim.onComplete.add(() => {
           const newFormHalo = this.add.sprite(player.x, player.y, 'player-halo');
           newFormHalo.animations.add('idle', [0, 1, 2, 3, 4, 5, 6], 10, true);
