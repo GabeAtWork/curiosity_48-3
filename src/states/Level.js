@@ -48,7 +48,7 @@ export default class extends Phaser.State {
   }
 
   update() {
-    const {killers, player, winPortal, pause, state} = this.props;
+    const {killers = [], player, winPortal, pause, state} = this.props;
 
     killers.forEach(killer => {
       this.physics.arcade.overlap(player, killer, () => this.gameOver(), null, this);
@@ -86,12 +86,12 @@ export default class extends Phaser.State {
 
     if (cursors.left.isDown) {
       player.animations.stop();
-      player.body.velocity.x = -20;
+      player.body.velocity.x = -player.customSpeed;
       player.angle = -10;
     }
     else if (cursors.right.isDown) {
       player.animations.stop();
-      player.body.velocity.x = 20;
+      player.body.velocity.x = player.customSpeed;
       player.angle = 10;
     }
     else {
@@ -223,15 +223,15 @@ export default class extends Phaser.State {
     return physicsGroup;
   }
 
-  createGround(group, x, y, assetRef = 'ground') {
+  createGround(group, x, y, assetRef) {
     const ground = group.create(x, y, assetRef);
     ground.body.immovable = true;
 
     return ground;
   }
 
-  createPlayer(x, y) {
-    const player = this.add.sprite(x, y, 'curiosity');
+  createPlayer(x, y, sprite = 'curiosity', customSpeed = 20) {
+    const player = this.add.sprite(x, y, sprite);
 
     player.animations.add('idle', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], 10, true);
     player.anchor.setTo(0.5, 0.5);
@@ -241,6 +241,7 @@ export default class extends Phaser.State {
     player.body.bounce.y = 0.5;
     player.body.gravity.y = 500;
     player.body.collideWorldBounds = true;
+    player.customSpeed = customSpeed;
     return player;
   }
 
@@ -254,9 +255,11 @@ export default class extends Phaser.State {
 
   setPlayerHalo(isCapturing) {
     const {player, playerHalo} = this.props;
-    playerHalo.x = player.x;
-    playerHalo.y = player.y;
-    playerHalo.alpha = isCapturing ? 1 : 0;
+    if (playerHalo) {
+      playerHalo.x = player.x;
+      playerHalo.y = player.y;
+      playerHalo.alpha = isCapturing ? 1 : 0;
+    }
   }
 
   spawnCapturable(capturableData, platformGroup, CapturableType) {
@@ -363,7 +366,7 @@ export default class extends Phaser.State {
       const haloScaleX = 1 + (currentLaserTarget.scale.x - 1) / 2;
       const haloScaleY = 1 + (currentLaserTarget.scale.y - 1) / 2;
       orbHalo.scale.setTo(haloScaleX, haloScaleY);
-    } else {
+    } else if (orbHalo) {
       orbHalo.alpha = 0;
     }
   }
